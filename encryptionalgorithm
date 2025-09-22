@@ -1,0 +1,89 @@
+; 7-Segment Display Controller with Inversion and Rotation
+; For Corsham KIM-1 Clone
+; starting at address $0200
+
+; Initialize ports as outputs
+0200    A9 FF     ; LDA #$FF    (Set all pins as outputs)
+0202    8D 01 17  ; STA $1701   (Configure Port A as output)
+0205    8D 03 17  ; STA $1703   (Configure Port B as output)
+
+; Main program loop
+; Display original value on first display
+0208    A9 68     ; LDA #$68    (Value for digit "3")
+020A    49 FF     ; EOR #$FF    (Invert bits for active-low logic)
+020C    8D 00 17  ; STA $1700   (Show on first display)
+020F    A9 00     ; LDA #$00    (All segments on when inverted)
+0211    8D 02 17  ; STA $1702   (Turn off second display)
+
+; Delay
+0214    20 4F 02  ; JSR $024F   (Call delay subroutine)
+
+; Turn off first display
+0217    A9 00     ; LDA #$00    (All segments on when inverted)
+0219    8D 00 17  ; STA $1700   (Turn off first display)
+
+; Short delay with both displays off
+021C    20 5A 02  ; JSR $025A   (Call short delay subroutine)
+
+; Process and display on second display:
+; 1. Start with original value
+; 2. Invert it
+; 3. Rotate it right by 3 bits
+; 4. Display on second display
+021F    A9 68     ; LDA #$68    (Original value for digit "3")
+0221    49 FF     ; EOR #$FF    (Invert bits)
+0223    A2 03     ; LDX #$03    (Set rotation count to 3)
+0225    18        ; CLC         (Clear carry flag before rotation)
+0226    6A        ; ROR A       (Rotate right 1 bit)
+0227    CA        ; DEX         (Decrement rotation counter)
+0228    D0 FC     ; BNE $0226   (Loop until all rotations done)
+022A    8D 02 17  ; STA $1702   (Show rotated value on second display)
+022D    A9 00     ; LDA #$00    (All segments on when inverted)
+022F    8D 00 17  ; STA $1700   (Ensure first display is off)
+
+; Delay
+0232    20 4F 02  ; JSR $024F   (Call delay subroutine)
+
+; Turn off second display
+0235    A9 00     ; LDA #$00    (All segments on when inverted)
+0237    8D 02 17  ; STA $1702   (Turn off second display)
+
+; Short delay with both displays off
+023A    20 5A 02  ; JSR $025A   (Call short delay subroutine)
+
+; Loop back to main
+023D    4C 08 02  ; JMP $0208   (Repeat forever)
+
+; Optional: Alternate version that rotates left instead of right
+; Replace addresses 0223-0228 with:
+;0223    A2 03     ; LDX #$03    (Set rotation count to 3)
+;0225    18        ; CLC         (Clear carry flag before rotation)
+;0226    2A        ; ROL A       (Rotate left 1 bit)
+;0227    CA        ; DEX         (Decrement rotation counter)
+;0228    D0 FC     ; BNE $0226   (Loop until all rotations done)
+
+; Optional: Alternate version that uses a variable rotation count
+; Store rotation count at address $0080
+;0200    A9 03     ; LDA #$03    (Set rotation count to 3)
+;0202    85 80     ; STA $80     (Store rotation count)
+;...
+;0223    A6 80     ; LDX $80     (Load rotation count)
+;...
+
+; Delay subroutine
+024F    A2 FF     ; LDX #$FF    (Outer loop counter)
+0251    A0 FF     ; LDY #$FF    (Inner loop counter)
+0253    88        ; DEY         (Decrement Y)
+0254    D0 FD     ; BNE $0253   (Loop if Y not zero)
+0256    CA        ; DEX         (Decrement X)
+0257    D0 F8     ; BNE $0251   (Loop if X not zero)
+0259    60        ; RTS         (Return from subroutine)
+
+; Short delay subroutine
+025A    A2 40     ; LDX #$40    (Outer loop counter - shorter)
+025C    A0 FF     ; LDY #$FF    (Inner loop counter)
+025E    88        ; DEY         (Decrement Y)
+025F    D0 FD     ; BNE $025E   (Loop if Y not zero)
+0261    CA        ; DEX         (Decrement X)
+0262    D0 F8     ; BNE $025C   (Loop if X not zero)
+0264    60        ; RTS         (Return from subroutine)
