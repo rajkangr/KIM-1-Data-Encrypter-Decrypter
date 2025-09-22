@@ -54,21 +54,28 @@
 ; Loop back to main
 023D    4C 08 02  ; JMP $0208   (Repeat forever)
 
-; Optional: Alternate version that rotates left instead of right
-; Replace addresses 0223-0228 with:
+; alternate versions of algorithm that rotates left instead of right
+; test later ot see if works
+
+; rotates left instead of right 
 ;0223    A2 03     ; LDX #$03    (Set rotation count to 3)
 ;0225    18        ; CLC         (Clear carry flag before rotation)
 ;0226    2A        ; ROL A       (Rotate left 1 bit)
 ;0227    CA        ; DEX         (Decrement rotation counter)
 ;0228    D0 FC     ; BNE $0226   (Loop until all rotations done)
 
-; Optional: Alternate version that uses a variable rotation count
-; Store rotation count at address $0080
+; uses a variable rotation count
+; store rotation count at address $0080
+; test later to see if works
 ;0200    A9 03     ; LDA #$03    (Set rotation count to 3)
 ;0202    85 80     ; STA $80     (Store rotation count)
 ;...
 ;0223    A6 80     ; LDX $80     (Load rotation count)
 ;...
+
+; 02XX LDA encrypt
+; 02XX EOR #$AA
+; 02XX STA decrypted
 
 ; Delay subroutine
 024F    A2 FF     ; LDX #$FF    (Outer loop counter)
